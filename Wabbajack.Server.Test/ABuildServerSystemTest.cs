@@ -29,12 +29,16 @@ namespace Wabbajack.BuildServer.Test
 
         public readonly TempFolder _severTempFolder = TempFolder.Create().Result;
         private bool _disposed = false;
+        private IHost _cdnHost;
+        private CancellationTokenSource _cdnToken;
+        private Task _cdnTask;
         public AbsolutePath ServerTempFolder => _severTempFolder.Dir;
 
         public AbsolutePath ServerPublicFolder => "public".RelativeTo(AbsolutePath.EntryPoint);
 
         public AbsolutePath ServerArchivesFolder => "archives".RelativeTo(AbsolutePath.EntryPoint);
         public AbsolutePath ServerUpdatesFolder => "updates".RelativeTo(AbsolutePath.EntryPoint);
+        public AbsolutePath CDNFolder => "cdnFolder".RelativeTo(AbsolutePath.EntryPoint);
 
 
         public override async Task InitializeAsync()
@@ -63,6 +67,16 @@ namespace Wabbajack.BuildServer.Test
             _task = _host.RunAsync(_token.Token);
             Consts.WabbajackBuildServerUri = new Uri("http://localhost:8080");
             Consts.TestMode = true;
+
+            var cdnBuilder = Server.CDN.Program.CreateHostBuilder(
+                new[]
+                {
+                    $"WabbajackSettings:Remote={Consts.WabbajackBuildServerUri}",
+                    $"WabbajackSettings.CDNFolder={CDNFolder}"
+                });
+            _cdnHost = builder.Build();
+            _cdnToken = new CancellationTokenSource();
+            _cdnTask = _host.RunAsync(_cdnToken);
 
             await "ServerWhitelist.yaml".RelativeTo(ServerPublicFolder).WriteAllTextAsync(
                 "GoogleIDs:\nAllowedPrefixes:\n    - http://localhost");
@@ -101,9 +115,13 @@ namespace Wabbajack.BuildServer.Test
             if (!_token.IsCancellationRequested)
                 _token.Cancel();
 
+            if (!_cdnToken.IsCancellationRequested)
+                _cdnToken.Cancel();
+
             try
             {
                 _task.Wait();
+                _cdnTask.Wait();
             }
             catch (Exception)
             {

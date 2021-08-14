@@ -18,6 +18,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\Wabbajack.Common\Wabbajack.Common.csproj" />
+      <ProjectReference Include="..\Wabbajack.Server.CDN\Wabbajack.Server.CDN.csproj" />
       <ProjectReference Include="..\Wabbajack.Server\Wabbajack.Server.csproj" />
     </ItemGroup>
 
