@@ -12,7 +12,7 @@
       <PackageReference Include="Shipwreck.Phash.Bitmaps" Version="0.5.0" />
       <PackageReference Include="Silk.NET.Direct3D11" Version="2.6.0" />
       <PackageReference Include="Silk.NET.DXGI" Version="2.6.0" />
-      <PackageReference Include="System.Drawing.Common" Version="5.0.2" />
+      <PackageReference Include="System.Drawing.Common" Version="5.0.3" />
     </ItemGroup>
 
     <ItemGroup>
